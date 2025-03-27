@@ -3,6 +3,9 @@ from fastapi import FastAPI, File, UploadFile, HTTPException
 from fastapi.responses import FileResponse
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
+from models.paciente import PacienteCreate
+from db.config import get_db
+from db.db import insertar_paciente
 import shutil
 import os
 
@@ -37,3 +40,16 @@ async def list_files():
     html_content += "</body></html>"
     
     return HTMLResponse(content=html_content)
+
+@app.post("/paciente/")
+async def create_paciente(p: PacienteCreate):
+    db = next(get_db())
+    try:
+        insertar_paciente(db, p)  # Usar la sesión correctamente
+        db.commit()
+        return {"message": "Paciente almacenado correctamente"}
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
+    finally:
+        db.close()
