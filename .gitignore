@@ -1,0 +1,16 @@
+venv/
+paciente.db
+uploads/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.vscode/
+.env
+*.db
+*.sqlite3
+.DS_Store
+Thumbs.db
+htmlcov/
+.coverage
+coverage.xml
+.ipynb_checkpoints/
