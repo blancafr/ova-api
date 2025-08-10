@@ -1,16 +1,34 @@
+from fastapi import UploadFile, File, APIRouter, Depends
 from fastapi.responses import HTMLResponse
-from datetime import datetime
+from sqlalchemy.orm import Session
 import shutil
 import os
+from datetime import datetime
+
+from app.db.registry_database import get_db
+from app.crud.registry import get_latest_date_records, create_registry_record
+from app.processing.pipeline import process_image_file
 
 UPLOAD_DIR = "uploads"
 
-async def save_upload_file(file):
+def save_upload_file(file):
     file_location = f"{UPLOAD_DIR}/{file.filename}"
     with open(file_location, "wb") as buffer:
         shutil.copyfileobj(file.file, buffer)
     print(f"{datetime.now().isoformat()}: Imagen recibida: {file.filename}")
-    return {"filename": file.filename, "message": "Imagen recibida correctamente"}
+    return
+
+def process_upload_file(file, db: Session = Depends(get_db)):
+    file_location = f"{UPLOAD_DIR}/{file.filename}"
+
+    latest_records = get_latest_date_records(db)
+
+    new_records = process_image_file(file_location, latest_records)
+
+    if new_records:
+        for record in new_records:
+            create_registry_record(db, record)
+    return new_records
 
 def list_uploaded_images():
     files = os.listdir(UPLOAD_DIR)
