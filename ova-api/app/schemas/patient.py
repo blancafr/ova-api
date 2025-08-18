@@ -6,3 +6,10 @@ class PatientCreate(BaseModel):
     disease: str = Field(..., alias="enfermedad")
     comment: str = Field(..., alias="comentario")
     date: str = Field(..., alias="fecha")
+
+class Patient(BaseModel):
+    pass
+
+class PatientInDB(Patient):
+    class Config:
+        from_attributes = True
