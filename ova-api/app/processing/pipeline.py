@@ -14,6 +14,6 @@ def process_image_file(path, previous_rows=None) -> list[RegistryCreate]:
         return list[RegistryCreate]()
     
     raw_rows = group_data_by_row(cells, path)
-    rows_ok = filter_isolated_rows(raw_rows)
+    rows_ok = filter_isolated_rows(raw_rows, path)
     unique_rows = compare_and_filter_repeated_rows(rows_ok, previous_rows or [])
     return unique_rows

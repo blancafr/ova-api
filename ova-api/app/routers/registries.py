@@ -36,7 +36,10 @@ async def process_existing_uploads(
 
     if os.path.exists(CONTROL_FILE):
         raise HTTPException(status_code=400, detail="Este proceso ya se ejecutó antes")
-
+    
+    with open(CONTROL_FILE, "w") as f:
+        f.write("processed")
+    
     files = [f for f in os.listdir(UPLOAD_DIR) if os.path.isfile(os.path.join(UPLOAD_DIR, f))]
     files_sorted = sorted(files)
 
@@ -61,9 +64,5 @@ async def process_existing_uploads(
             processed_files.append(filename)
         except Exception as e:
             errors.append({"file": filename, "error": str(e)})
-
-    # Crear archivo de control para marcar que ya se ejecutó
-    with open(CONTROL_FILE, "w") as f:
-        f.write("processed")
 
     return {"processed_files": processed_files, "errors": errors}

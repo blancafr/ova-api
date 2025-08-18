@@ -1,10 +1,12 @@
 from app.schemas.registry import RegistryCreate
+from app.main import logger
 
-def filter_isolated_rows(detected_rows, min_consecutive=2, min_variables=2) -> list[RegistryCreate]:
+def filter_isolated_rows(detected_rows, image_path, min_consecutive=2, min_variables=2) -> list[RegistryCreate]:
     """
     Removes:
     - Isolated rows or blocks that are too small (less than `min_consecutive`)
     - Rows that contain fewer than `min_variables` marked variables (sex, age, or diseases)
+    - Rows that contains multiple disseases in rows (probably shadows are causing this)
     """
     if not detected_rows:
         return []
@@ -28,6 +30,7 @@ def filter_isolated_rows(detected_rows, min_consecutive=2, min_variables=2) -> l
 
     # Filter by valid blocks and minimum number of variables
     filtered_rows = []
+    rows_num_disseases = 0
     for row in sorted_rows:
         if row["row_num"] in valid_blocks:
             total_variables = len(row["sex"]) + len(row["age"]) + len(row["diseases"])
@@ -39,13 +42,18 @@ def filter_isolated_rows(detected_rows, min_consecutive=2, min_variables=2) -> l
                     sex=row["sex"][0] if row["sex"] else "",
                     age=row["age"][0] if row["age"] else "",
                     diseases=row["diseases"]))
-
+            if len(row["diseases"]) > 3:
+                rows_num_disseases += 1
+    if rows_num_disseases > 0.5 * len(filtered_rows):
+        print(f"Detected {rows_num_disseases} rows with high number of diseases for image: {image_path}")
+        logger.error(f"Detected multiple rows with high number of disseas. For image: {image_path}")
+        return []
     return filtered_rows
 
 def compare_and_filter_repeated_rows(
     new_rows: list[RegistryCreate], 
     previous_rows: list[RegistryCreate], 
-    match_threshold=0.70
+    match_threshold=0.60
 ):
     """
     Detects if the new rows already include records from the previous day.
