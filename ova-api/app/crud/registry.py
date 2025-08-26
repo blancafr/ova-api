@@ -1,9 +1,9 @@
-from typing import List
+from typing import List, Optional
 from sqlalchemy.orm import Session
 from app.models.registry import Registry
 from app.schemas.registry import RegistryCreate, RegistryInDB
 from datetime import date
-from sqlalchemy import func
+from sqlalchemy import func, and_
 
 def create_registry_record(db: Session, record: RegistryCreate):
     db_record = Registry(
@@ -27,4 +27,28 @@ def get_latest_date_records(db: Session):
     records = db.query(Registry).filter(Registry.id == latest_date).all()
     registries = [RegistryInDB.from_orm(r) for r in records]
     return registries
+
+def get_registries(
+    db: Session,
+    start_date: Optional[date] = None,
+    end_date: Optional[date] = None,
+    sex: Optional[str] = None,
+    age: Optional[str] = None,
+) -> List[Registry]:
+    query = db.query(Registry)
+    
+    filters = []
+    if start_date:
+        filters.append(Registry.date >= start_date)
+    if end_date:
+        filters.append(Registry.date <= end_date)
+    if sex:
+        filters.append(Registry.sex == sex)
+    if age:
+        filters.append(Registry.age == age)
+    
+    if filters:
+        query = query.filter(and_(*filters))
+    
+    return query.all()
 
