@@ -11,7 +11,7 @@ from app.config import settings
 from app.schemas.user import Token, UserCreate, UserPublic
 from app.db.user_database import get_db
 
-router = APIRouter(tags=["users"])
+router = APIRouter()
 SessionDep = Annotated[Session, Depends(get_db)]
 
 @router.post("/login/access-token", response_model=Token)

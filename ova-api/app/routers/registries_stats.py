@@ -12,7 +12,7 @@ from app.services.registries_service import (
     get_patients_per_day,
 )
 
-router = APIRouter(tags=["Statistics"], dependencies=[Depends(get_current_active_superuser)])
+router = APIRouter(dependencies=[Depends(get_current_active_superuser)])
 
 @router.get("/total-patients")
 def total_patients(
