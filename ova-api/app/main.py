@@ -37,6 +37,5 @@ app.add_middleware(
 app.mount("/images", StaticFiles(directory=UPLOAD_DIR), name="images")
 
 app.include_router(registries_upload.router, tags=["Image Upload"])
-app.include_router(patient.router, tags=["Patient"])
 app.include_router(user.router, prefix="/users", tags=["Users"])
 app.include_router(registries_stats.router, prefix="/stats", tags=["Stats"])
