@@ -5,7 +5,7 @@ import shutil
 import os
 
 from collections import Counter, defaultdict
-from typing import Optional, Dict
+from typing import Optional, Dict, List, Tuple
 from datetime import date, datetime
 
 from app.db.registry_database import get_db
@@ -67,3 +67,94 @@ def get_patients_per_day(db: Session, start_date: Optional[date], end_date: Opti
     for r in registries:
         daily_counts[r.date] += 1
     return dict(sorted(daily_counts.items()))
+
+def _normalize_disease_name(name: str) -> str:
+    return (name or "").strip().lower()
+
+def _split_diseases(raw: str) -> List[str]:
+    if not raw:
+        return []
+    return [d.strip().lower() for d in raw.split(",") if d.strip()]
+
+def _registries_for_disease(
+    db: Session,
+    disease: str,
+    start_date: Optional[date],
+    end_date: Optional[date],
+    sex: Optional[str],
+    age: Optional[str],
+):
+    target = _normalize_disease_name(disease)
+    base = get_registries(db, start_date, end_date, sex, age)
+    return [r for r in base if target in _split_diseases(r.diseases)]
+
+def get_disease_total_patients(
+    db: Session, disease: str, start_date: Optional[date], end_date: Optional[date],
+    sex: Optional[str], age: Optional[str]
+) -> int:
+    regs = _registries_for_disease(db, disease, start_date, end_date, sex, age)
+    return len(regs)
+
+def get_disease_gender_distribution(
+    db: Session, disease: str, start_date: Optional[date], end_date: Optional[date],
+    sex: Optional[str], age: Optional[str]
+) -> Dict[str, int]:
+    regs = _registries_for_disease(db, disease, start_date, end_date, sex, age)
+    c = Counter()
+    for r in regs:
+        if r.sex:
+            c[r.sex] += 1
+    return dict(c)
+
+def get_disease_age_distribution(
+    db: Session, disease: str, start_date: Optional[date], end_date: Optional[date],
+    sex: Optional[str], age: Optional[str]
+) -> Dict[str, int]:
+    regs = _registries_for_disease(db, disease, start_date, end_date, sex, age)
+    c = Counter()
+    for r in regs:
+        if r.age:
+            c[r.age] += 1
+    return dict(c)
+
+def get_disease_related(
+    db: Session, disease: str, start_date: Optional[date], end_date: Optional[date],
+    sex: Optional[str], age: Optional[str]
+) -> List[Tuple[str, int]]:
+    regs = _registries_for_disease(db, disease, start_date, end_date, sex, age)
+    target = _normalize_disease_name(disease)
+    c = Counter()
+    for r in regs:
+        for d in _split_diseases(r.diseases):
+            if d and d != target:
+                c[d] += 1
+    return sorted(c.items(), key=lambda x: x[1], reverse=True)
+
+def get_disease_patients_per_day(
+    db: Session,
+    disease: str,
+    start_date: Optional[date],
+    end_date: Optional[date],
+    sex: Optional[str],
+    age: Optional[str],
+):
+    regs_disease = _registries_for_disease(db, disease, start_date, end_date, sex, age)
+    daily_counts = defaultdict(int)
+    for r in regs_disease:
+        daily_counts[r.date] += 1
+    # ordenado por fecha asc
+    return dict(sorted(daily_counts.items()))
+
+def get_disease_proportion_overall(
+    db: Session,
+    disease: str,
+    start_date: Optional[date],
+    end_date: Optional[date],
+    sex: Optional[str],
+    age: Optional[str],
+) -> float:
+    regs_disease = _registries_for_disease(db, disease, start_date, end_date, sex, age)
+    regs_all = get_registries(db, start_date, end_date, sex, age)
+    total = len(regs_disease)
+    total_global = len(regs_all) if regs_all is not None else 0
+    return (total / total_global) if total_global else 0.0
