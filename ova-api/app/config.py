@@ -1,14 +1,11 @@
 
 import secrets
-
-from pydantic import (
-    EmailStr,
-    model_validator,
-)
-
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from typing_extensions import Self
 
+from pydantic import (
+    EmailStr,
+)
 
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(

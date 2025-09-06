@@ -10,9 +10,9 @@ from app.models.user import User
 from app.config import settings
 from app.schemas.user import TokenPayload
 from app.db.user_database import get_db
-from app.auth.security import ALGORITHM  # ✅ importa el algoritmo correcto
+from app.auth.security import ALGORITHM
 
-# Si incluyes el router con prefix="/users", deja como está:
+
 reusable_oauth2 = OAuth2PasswordBearer(tokenUrl="users/login/access-token")
 
 SessionDep = Annotated[Session, Depends(get_db)]

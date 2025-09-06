@@ -1,5 +1,5 @@
 
-from pydantic import BaseModel, EmailStr, constr
+from pydantic import BaseModel, EmailStr
 from pydantic import BaseModel, Field
 from typing import Annotated
 import uuid

@@ -1,12 +1,10 @@
-from fastapi import APIRouter, File, UploadFile, Depends, HTTPException
-from app.services.registries_service import process_upload_file, list_uploaded_images, save_upload_file
+from fastapi import APIRouter, File, UploadFile, Depends
+from app.services.registries_service import process_upload_file, save_upload_file
 from sqlalchemy.orm import Session
 from app.db.registry_database import get_db
 from app.main import logger
 import os
 
-from sqlalchemy.exc import IntegrityError
-from app.db.registry_database import SessionLocal
 
 UPLOAD_DIR = "uploads"
 CONTROL_FILE = os.path.join(UPLOAD_DIR, ".processed_flag") 

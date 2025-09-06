@@ -1,6 +1,5 @@
 import logging
 
-# Configure logging (do this once)
 logging.basicConfig(
     filename="upload_errors.log",
     level=logging.ERROR,
@@ -9,12 +8,11 @@ logging.basicConfig(
 
 logger = logging.getLogger(__name__)
 
-from fastapi import FastAPI, Depends
+from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
-from app.routers import patient, registries_upload, user, registries_stats
+from app.routers import registries_upload, user, registries_stats
 import os
-from app.db.user_database import init_db, get_db
-from sqlalchemy.orm import Session
+from app.db.user_database import init_db
 from typing import Annotated
 from fastapi.middleware.cors import CORSMiddleware
 

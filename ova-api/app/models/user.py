@@ -1,7 +1,7 @@
 import uuid
 import datetime
 
-from sqlalchemy import Column, String, Boolean, DateTime, Integer
+from sqlalchemy import Column, String, Boolean, DateTime
 from app.db.user_database import Base
 
 class User(Base):
