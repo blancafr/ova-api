@@ -58,6 +58,9 @@ If the table design changes, you will need to update the [processing constants](
 
 ![Table format](/ova-api/assets/table-format.jpg)
 
+### Data visualization
+
+📱 You can find a web application with React for visualizing the exposed statistical data here: [web-app](https://github.com/blancafr/web-app)
 
 
 
